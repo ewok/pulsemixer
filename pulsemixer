@@ -1395,6 +1395,13 @@ class Screen():
         tmp = []
         index = 0
         for device in devices:
+            filtered = False
+            for key in CFG.ignores:
+                if key.match(str(device.description)):
+                    filtered = True
+                    break
+            if filtered:
+                continue
             index += device.volume.channels
             stream_index = device.volume.channels
             tmp.append([device, device.volume.channels, index, stream_index])
@@ -1787,6 +1794,7 @@ class Config():
         self.ui = UI()
         self.style = Style()
         self.renames = {}
+        self.ignores = {}
         self.path = os.getenv("XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")) + '/pulsemixer.cfg'
 
     def save(self):
@@ -1853,6 +1861,11 @@ class Config():
         ; 'default name example' = 'new name'
         ; '(?i)built-in .* audio' = 'Audio Controller'
         ; 'AudioIPC Server' = 'Firefox'
+
+        [ignores]
+        ;; Ignores stream with matched names
+        ;; https://docs.python.org/3/library/re.html#regular-expression-syntax
+        ; hdmi = '.*HDMI.*'
         '''
         directory = self.path.rsplit('/', 1)[0]
         if not os.path.exists(directory):
@@ -1869,6 +1882,9 @@ class Config():
         if parser.has_section('renames'):
             self.renames = {re.compile(k.strip('"\'') + r'\Z'):v.strip('"\'') for k, v in parser.items('renames')}
             parser.remove_section('renames')
+        if parser.has_section('ignores'):
+            self.ignores = {re.compile(v.strip('"\'') + r'\Z') for _, v in parser.items('ignores')}
+            parser.remove_section('ignores')
         def getkeys(s, k):
             keys = []
             for i in parser.get(s, k).strip(',').split(','):

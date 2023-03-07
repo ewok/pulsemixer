@@ -179,6 +179,11 @@ step-big = 10
 ; 'default name example' = 'new name'
 ; '(?i)built-in .* audio' = 'Audio Controller'
 ; 'AudioIPC Server' = 'Firefox'
+
+[ignores]
+;; Ignores stream with matched names
+;; https://docs.python.org/3/library/re.html#regular-expression-syntax
+; hdmi = '.*HDMI.*'
 ```
 
 The old environment variable `PULSEMIXER_BAR_STYLE` is still supported.
